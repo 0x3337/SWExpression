@@ -1,5 +1,5 @@
 //
-//  ExpressionTree.swift
+//  SWExpression.swift
 //
 //
 //  Created by Mirsaid Patarov on 7/20/20.
@@ -7,18 +7,17 @@
 
 import Foundation
 
-public class ExpressionTree {
+public class SWExpression {
   private var root: Node!
   private var operands = [Node]()
   private var operators = [OperatorNode]()
 
-
-
-  public init(_ expression: String) {
+  public init(format expressionFormat: String) {
     var str = ""
     var prevOp: Operator?
+    let expressionFormat = expressionFormat.filter { !$0.isWhitespace }
 
-    for (i, letter) in expression.enumerated() {
+    for (i, letter) in expressionFormat.enumerated() {
       var op = Operator(rawValue: "\(letter)")
 
       if op == nil || ((prevOp != nil || i == 0) && op == .subtract) {
@@ -28,7 +27,7 @@ public class ExpressionTree {
         op = nil
       }
 
-      if op != nil || i == expression.count - 1 {
+      if op != nil || i == expressionFormat.count - 1 {
         let number = NSDecimalNumber(string: str)
         operands.append(OperandNode(number))
 
@@ -56,9 +55,18 @@ public class ExpressionTree {
     }
   }
 
+  public func calculate() -> NSDecimalNumber {
+    while !(root is OperandNode) {
+      calculate(parent: root)
+    }
 
+    let node = root as! OperandNode
+    return node.value
+  }
+}
 
-  private func processOperator(_ op: OperatorNode) {
+private extension SWExpression {
+  func processOperator(_ op: OperatorNode) {
     if operators.isEmpty {
       operators.append(op)
     } else {
@@ -80,8 +88,7 @@ public class ExpressionTree {
     }
   }
 
-  private func calculate(a: NSDecimalNumber, operator op: Operator, b: NSDecimalNumber) -> NSDecimalNumber {
-    print(a, op.rawValue, b)
+  func calculate(a: NSDecimalNumber, operator op: Operator, b: NSDecimalNumber) -> NSDecimalNumber {
     switch op {
     case .add:
       return a.adding(b)
@@ -94,13 +101,13 @@ public class ExpressionTree {
     }
   }
 
-  private func calculate(parent: Node, child: Node? = nil) {
+  func calculate(parent: Node, child: Node? = nil) {
     guard let parent = parent as? OperatorNode else {
       return
     }
 
-    if let l = parent.left as? OperandNode, let r = parent.right as? OperandNode {
-      let value = calculate(a: l.value, operator: parent.operator, b: r.value)
+    if let leftOperand = parent.left as? OperandNode, let rightOperand = parent.right as? OperandNode {
+      let value = calculate(a: leftOperand.value, operator: parent.operator, b: rightOperand.value)
       root = OperandNode(value)
 
       return
@@ -108,8 +115,8 @@ public class ExpressionTree {
 
     let child = child ?? parent
     if let op = child as? OperatorNode {
-      if let l = op.left as? OperandNode, let r = op.right as? OperandNode {
-        let value = calculate(a: l.value, operator: op.operator, b: r.value)
+      if let leftOperand = op.left as? OperandNode, let rightOperand = op.right as? OperandNode {
+        let value = calculate(a: leftOperand.value, operator: op.operator, b: rightOperand.value)
 
         if parent.left == child {
           parent.left = OperandNode(value)
@@ -117,24 +124,14 @@ public class ExpressionTree {
           parent.right = OperandNode(value)
         }
       } else {
-        if let l = op.left as? OperatorNode {
-          calculate(parent: op, child: l)
+        if let leftOperator = op.left as? OperatorNode {
+          calculate(parent: op, child: leftOperator)
         }
 
-        if let r = op.right as? OperatorNode {
-          calculate(parent: op, child: r)
+        if let rightOperator = op.right as? OperatorNode {
+          calculate(parent: op, child: rightOperator)
         }
       }
     }
-  }
-
-
-  public func calculate() -> NSDecimalNumber {
-    while !(root is OperandNode) {
-      calculate(parent: root)
-    }
-
-    let node = root as! OperandNode
-    return node.value
   }
 }

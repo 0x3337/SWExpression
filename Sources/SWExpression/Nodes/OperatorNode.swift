@@ -17,8 +17,6 @@ class OperatorNode: Node {
     return `operator`.precedence
   }
 
-
-
   init(_ operator: Operator) {
     self.operator = `operator`
   }

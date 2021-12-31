@@ -6,9 +6,8 @@
 //
 
 import XCTest
-
-import ExpressionTree
+import SWExpression
 
 var tests = [XCTestCaseEntry]()
-tests += ExpressionTreeTests.allTests()
+tests += SWExpressionTests.allTests()
 XCTMain(tests)
