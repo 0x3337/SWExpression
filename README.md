@@ -30,7 +30,7 @@ If you prefer not to use either of the aforementioned dependency managers, you c
 import SWExpression
 
 let expression = SWExpression(format: "3337 + 27 * 1991 / 5.5")
-let result: NSDecimalNumber = expression.calculate() // 13111
+let result: Decimal = expression.evaluate() // 13111
 ```
 
 ## License
